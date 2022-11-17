@@ -36,7 +36,7 @@ def on_interaction(data):
         auth = {
             "Authorization": os.getenv("AI_TOKEN")
         }
-        f = requests.post("https://api.xeno-ai.space/v2/images", data={"prompt": prompt}, headers=auth).json()
+        f = requests.post("https://api.xeno-ai.space/v3/images", data={"prompt": prompt}, headers=auth).json()
         payload = {
             "embeds": [
                 {
