@@ -38,11 +38,11 @@ def on_interaction(data):
             }
         }
         requests.post(f"https://discord.com/api/v10/interactions/{data['d']['id']}/{data['d']['token']}/callback", json=payload)
-        imgs = []
-        auth = {
-            "Authorization": os.getenv("AI_TOKEN")
-        }
         try:
+            imgs = []
+            auth = {
+                "Authorization": os.getenv("AI_TOKEN")
+            }
             f = requests.post("https://api.xeno-ai.space/v3/images", data={"prompt": prompt}, headers=auth).json()
             payload = {
                 "embeds": [
