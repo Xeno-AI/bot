@@ -18,7 +18,7 @@ def on_interaction(data):
                             {
                                 "name": "Text Prompt",
                                 "value": prompt,
-                                "inline": True
+                                "inline": False
                             },
                             {
                                 "name": "Requested By",
@@ -53,7 +53,7 @@ def on_interaction(data):
                             {
                                 "name": "Text Prompt",
                                 "value": prompt,
-                                "inline": True
+                                "inline": False
                             },
                             {
                                 "name": "Requested By",
