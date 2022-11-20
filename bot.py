@@ -3,6 +3,8 @@ import os, json, requests, websocket, threading, time
 def on_ready(data):
     print(f"[-]: Connected to Discord interval {interval}s")
     print(f"[-]: Username: {data['d']['user']['username']}")
+    for i in data["d"]["guilds"]:
+        print(f"[-]: Guild: {i['id']}")
 
 def on_interaction(data):
     if data["d"]["data"]["name"] == "generate":
