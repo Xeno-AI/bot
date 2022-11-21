@@ -121,7 +121,7 @@ def on_interaction(data):
                     }
                 ]
             }
-            return requests.post(f"https://discord.com/api/v10/webhooks/{os.getenv('DISCORD_CLIENT_ID')}/{data['d']['token']}", json=payload)
+            return requests.patch(f"https://discord.com/api/v10/webhooks/{os.getenv('DISCORD_CLIENT_ID')}/{data['d']['token']}/messages/@original", json=payload)
         except:
             return requests.post(f"https://discord.com/api/v10/webhooks/{os.getenv('DISCORD_CLIENT_ID')}/{data['d']['token']}", json={"content": "An error occurred while generating the AI image."})
 
