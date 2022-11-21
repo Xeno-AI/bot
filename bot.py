@@ -58,7 +58,7 @@ def on_interaction(data):
         try:
             imgs = []
             auth = {"Authorization": os.getenv("AI_TOKEN")}
-            f = requests.post("https://api.xeno-ai.space/v3/images", data={"prompt": prompt}, headers=auth).json()
+            f = requests.post("https://api.xeno-ai.space/v2/images", data={"prompt": prompt}, headers=auth).json()
             payload = {
                 "embeds": [
                     {
@@ -117,6 +117,35 @@ def on_interaction(data):
                                 "label": "D4",
                                 "style": 5,
                                 "url": f["images"][3]
+                            },
+                        ]
+                    },
+                    {
+                        "type": 1,
+                        "components": [
+                            {
+                                "type": 2,
+                                "label": "D5",
+                                "style": 5,
+                                "url": f["images"][4]
+                            },
+                            {
+                                "type": 2,
+                                "label": "D6",
+                                "style": 5,
+                                "url": f["images"][5]
+                            },
+                            {
+                                "type": 2,
+                                "label": "D7",
+                                "style": 5,
+                                "url": f["images"][6]
+                            },
+                            {
+                                "type": 2,
+                                "label": "D8",
+                                "style": 5,
+                                "url": f["images"][7]
                             }
                         ]
                     }
