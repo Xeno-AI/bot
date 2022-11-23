@@ -13,6 +13,20 @@ async def on_ready():
 
 @bot.command(name="generate", description="Generate an image from a prompt")
 async def generate(ctx, prompt):
+    async def loading_bar(msg, start):
+        while True:
+            await asyncio.sleep(2.5)
+            if time.time() - start < 8:
+                bar = f"{int(time.time() - start) / 8 * 100}% [{'=' * int((time.time() - start) / 8 * 10)}{'-' * (10 - int((time.time() - start) / 8 * 10))}] 100%"
+                embed = discord.Embed(title="Generating Image", description=bar, color=0x2f3136)
+                embed.add_field(name="Prompt", value=f"```{prompt}```", inline=False)
+                embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
+                embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
+                embed.color = discord.Color.blurple()
+                await msg.edit_original_response(embed=embed)
+            else:
+                return True
+
     async def upload(interaction):
         if ctx.author != interaction.user:
             return await interaction.response.send_message("You cannot do this", ephemeral=True)
@@ -34,10 +48,12 @@ async def generate(ctx, prompt):
     embed.color = discord.Color.blurple()
     msg = await ctx.respond(embed=embed)
     start = time.time()
+    loading_bar = asyncio.create_task(loading_bar(msg, start))
     async with aiohttp.ClientSession() as session:
         auth = {"Authorization": os.getenv("AI_TOKEN")}
         async with session.post("https://api.xeno-ai.space/v2/images", data={"prompt": prompt}, headers=auth) as resp:
             if resp.status == 200:
+                loading_bar.cancel()
                 data = await resp.json()
                 embed = discord.Embed(title="Generated Image", description=f"Your image has been generated in {round(time.time() - start, 2)} seconds")
                 embed.add_field(name="Prompt", value=f"```{prompt}```", inline=False)
