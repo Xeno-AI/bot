@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.10
 WORKDIR /usr/src/app
-RUN pip install websocket-client requests --no-cache-dir
+RUN pip install aiohttp[speedups] py-cord --no-cache-dir
 CMD python -u bot.py
