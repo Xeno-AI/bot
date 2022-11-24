@@ -16,7 +16,7 @@ async def generate(ctx, prompt):
     async def loading_bar(msg, start):
         while True:
             await asyncio.sleep(1)
-            if int(time.time() - start) / 8 * 100 > 100:
+            if int(time.time() - start) / 8 * 100 < 100:
                 bar = f"{int(time.time() - start) / 8 * 100}% [{'=' * int((time.time() - start) / 8 * 10)}{'-' * (10 - int((time.time() - start) / 8 * 10))}] 100%"
                 embed = discord.Embed(title="Generating Image", description=bar, color=0x2f3136)
                 embed.add_field(name="Prompt", value=f"```{prompt}```", inline=False)
