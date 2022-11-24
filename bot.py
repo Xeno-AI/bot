@@ -51,7 +51,7 @@ async def generate(ctx, prompt):
     loading_bar = asyncio.create_task(loading_bar(msg, start))
     async with aiohttp.ClientSession() as session:
         auth = {"Authorization": os.getenv("AI_TOKEN")}
-        async with session.post("https://api.xeno-ai.space/v2/images", data={"prompt": prompt}, headers=auth) as resp:
+        async with session.post("https://api.xeno-ai.space/images", data={"prompt": prompt}, headers=auth) as resp:
             if resp.status == 200:
                 loading_bar.cancel()
                 data = await resp.json()
