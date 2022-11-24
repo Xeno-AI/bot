@@ -41,7 +41,7 @@ async def generate(ctx, prompt):
         view.add_item(btnend)
         await interaction.response.edit_message(embed=embed, view=view)
 
-    embed = discord.Embed(title="Requested Image", description="Your image is being generated")
+    embed = discord.Embed(title="Generating Image", description="Please wait while we generate your image.")
     embed.add_field(name="Prompt", value=f"```{prompt}```", inline=False)
     embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
     embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
