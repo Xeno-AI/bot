@@ -18,8 +18,9 @@ async def generate(ctx, prompt):
             await asyncio.sleep(1)
             if int(time.time() - start) / 8 * 100 < 100:
                 bar = f"{int(time.time() - start) / 8 * 100}% [{'=' * int((time.time() - start) / 8 * 10)}{'-' * (10 - int((time.time() - start) / 8 * 10))}] 100%"
-                embed = discord.Embed(title="Generating Image", description=bar, color=0x2f3136)
+                embed = discord.Embed(title="Generating Image", description="Please wait while we generate your image.", color=0x2f3136)
                 embed.add_field(name="Prompt", value=f"```{prompt}```", inline=False)
+                embed.add_field(name="Progress", value=f"```{bar}```", inline=False)
                 embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
                 embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
                 embed.color = discord.Color.blurple()
@@ -72,6 +73,7 @@ async def generate(ctx, prompt):
                 view.add_item(btnend)
                 await msg.edit_original_response(embed=embed, view=view)
             else:
+                loading_bar.cancel()
                 embed = discord.Embed(title="Error", description=f"An error occurred while generating your image. Please try again later.")
                 embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
                 embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
