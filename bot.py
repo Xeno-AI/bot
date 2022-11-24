@@ -1,4 +1,4 @@
-import discord, os, aiohttp, asyncio, json, time
+import discord, os, aiohttp, asyncio, time, psutil, sqlite3
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 
@@ -9,15 +9,19 @@ async def on_ready():
     print(f"[-]: Logged in as {bot.user}")
     for guild in bot.guilds:
         print(f"[-]: {guild.name} ({guild.id})")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers", status=discord.Status.dnd))
+    while True:
+        await asyncio.sleep(20)
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers", status=discord.Status.dnd))
+        await asyncio.sleep(20)
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"/generate", status=discord.Status.dnd))
 
 @bot.command(name="generate", description="Generate an image from a prompt")
 async def generate(ctx, prompt):
     async def loading_bar(msg, start):
         while True:
             await asyncio.sleep(1)
-            if int(time.time() - start) / 8 * 100 < 100:
-                bar = f"{int(time.time() - start) / 8 * 100}% [{'=' * int((time.time() - start) / 8 * 25)}{' ' * (25 - int((time.time() - start) / 8 * 25))}] 100%"
+            if int(time.time() - start) / 13 * 100 < 100:
+                bar = f"{round(int(time.time() - start) / 13 * 100, 2)}% [{'=' * int((time.time() - start) / 13 * 25)}{' ' * (25 - int((time.time() - start) / 13 * 25))}] 100%"
                 embed = discord.Embed(title="Generating Image", description="Please wait while we generate your image.", color=0x2f3136)
                 embed.add_field(name="Prompt", value=f"```{prompt}```", inline=False)
                 embed.add_field(name="Progress", value=f"```{bar}```", inline=False)
@@ -81,5 +85,16 @@ async def generate(ctx, prompt):
                 embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
                 embed.color = discord.Color.red()
                 await msg.edit_original_response(embed=embed)
+
+@bot.command(name="stats", description="Get the vps stats")
+async def stats(ctx):
+    await ctx.defer()
+    embed = discord.Embed(title="VPS Stats", description="Here are the vps stats")
+    embed.color = discord.Color.blurple()
+    embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
+    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
+    embed.add_field(name="RAM Usage", value=f"```{round(psutil.virtual_memory().used / 1024 / 1024 / 1024, 2)}GB / {round(psutil.virtual_memory().total / 1024 / 1024 / 1024, 2)}GB```", inline=True)
+    embed.add_field(name="CPU Usage", value=f"```{psutil.cpu_percent()}% / 100%```", inline=True)
+    await ctx.respond(embed=embed)
 
 bot.run(TOKEN)
