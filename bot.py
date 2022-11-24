@@ -17,7 +17,7 @@ async def generate(ctx, prompt):
         while True:
             await asyncio.sleep(1)
             if int(time.time() - start) / 8 * 100 < 100:
-                bar = f"{int(time.time() - start) / 8 * 100}% [{'=' * int((time.time() - start) / 8 * 10)}{'-' * (10 - int((time.time() - start) / 8 * 10))}] 100%"
+                bar = f"{int(time.time() - start) / 8 * 100}% [{'=' * int((time.time() - start) / 8 * 25)}{' ' * (25 - int((time.time() - start) / 8 * 25))}] 100%"
                 embed = discord.Embed(title="Generating Image", description="Please wait while we generate your image.", color=0x2f3136)
                 embed.add_field(name="Prompt", value=f"```{prompt}```", inline=False)
                 embed.add_field(name="Progress", value=f"```{bar}```", inline=False)
@@ -34,10 +34,11 @@ async def generate(ctx, prompt):
         channel = bot.get_channel(1043953820125896715)
         await channel.send(f"**Prompt** {prompt}\n{data['output']}")
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label="D1", url=data["images"][0]))
-        view.add_item(discord.ui.Button(label="D2", url=data["images"][1]))
-        view.add_item(discord.ui.Button(label="D3", url=data["images"][2]))
-        btnend = discord.ui.Button(label="Upload to Xeno-AI", style=discord.ButtonStyle.primary)
+        view.add_item(discord.ui.Button(label="D1", row=0, url=data["images"][0]))
+        view.add_item(discord.ui.Button(label="D2", row=0, url=data["images"][1]))
+        view.add_item(discord.ui.Button(label="D3", row=0, url=data["images"][2]))
+        view.add_item(discord.ui.Button(label="Invite Bot", row=0, url=os.getenv("INVITE_LINK")))
+        btnend = discord.ui.Button(label="Upload to Xeno-AI", row=1, style=discord.ButtonStyle.primary)
         btnend.disabled = True
         view.add_item(btnend)
         await interaction.response.edit_message(embed=embed, view=view)
@@ -49,12 +50,12 @@ async def generate(ctx, prompt):
     embed.color = discord.Color.blurple()
     msg = await ctx.respond(embed=embed)
     start = time.time()
-    loading_bar = asyncio.create_task(loading_bar(msg, start))
+    l_bar = asyncio.create_task(loading_bar(msg, start))
     async with aiohttp.ClientSession() as session:
         auth = {"Authorization": os.getenv("AI_TOKEN")}
         async with session.post("https://api.xeno-ai.space/images", data={"prompt": prompt}, headers=auth) as resp:
             if resp.status == 200:
-                loading_bar.cancel()
+                l_bar.cancel()
                 data = await resp.json()
                 embed = discord.Embed(title="Generated Image", description=f"Your image has been generated in {round(time.time() - start, 2)} seconds")
                 embed.add_field(name="Prompt", value=f"```{prompt}```", inline=False)
@@ -65,15 +66,16 @@ async def generate(ctx, prompt):
                 embed.color = discord.Color.blurple()
                 embed.set_image(url=data["output"])
                 view = discord.ui.View()
-                view.add_item(discord.ui.Button(label="D1", url=data["images"][0]))
-                view.add_item(discord.ui.Button(label="D2", url=data["images"][1]))
-                view.add_item(discord.ui.Button(label="D3", url=data["images"][2]))
-                btnend = discord.ui.Button(label="Upload to Xeno-AI", style=discord.ButtonStyle.primary)
-                btnend.callback = upload
-                view.add_item(btnend)
+                view.add_item(discord.ui.Button(label="D1", row=0, url=data["images"][0]))
+                view.add_item(discord.ui.Button(label="D2", row=0, url=data["images"][1]))
+                view.add_item(discord.ui.Button(label="D3", row=0, url=data["images"][2]))
+                view.add_item(discord.ui.Button(label="Invite Bot", row=0, url=os.getenv("INVITE_LINK")))
+                upload_btn = discord.ui.Button(label="Upload to Xeno-AI", row=1, style=discord.ButtonStyle.primary)
+                upload_btn.callback = upload
+                view.add_item(upload_btn)
                 await msg.edit_original_response(embed=embed, view=view)
             else:
-                loading_bar.cancel()
+                l_bar.cancel()
                 embed = discord.Embed(title="Error", description=f"An error occurred while generating your image. Please try again later.")
                 embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
                 embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
