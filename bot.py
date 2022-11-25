@@ -10,16 +10,24 @@ async def on_ready():
     for guild in bot.guilds:
         print(f"[-]: {guild.name} ({guild.id})")
     while True:
-        await asyncio.sleep(20)
-        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers", status=discord.Status.dnd))
-        await asyncio.sleep(20)
-        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"/generate", status=discord.Status.dnd))
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://api.xeno-ai.space/stats") as resp:
+                data = await resp.json()
+                if resp.status == 200:
+                    await asyncio.sleep(10)
+                    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers", status=discord.Status.dnd))
+                    await asyncio.sleep(10)
+                    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"/generate", status=discord.Status.dnd))
+                    await asyncio.sleep(10)
+                    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{data['total_generations']} generations", status=discord.Status.dnd))
+                    await asyncio.sleep(10)
+                    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{round(data['database_size_mb'] / 1024, 2)} GB", status=discord.Status.dnd))
 
 @bot.command(name="generate", description="Generate an image from a prompt")
 async def generate(ctx, prompt):
     async def loading_bar(msg, start):
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
             if int(time.time() - start) / 13 * 100 < 100:
                 bar = f"{round(int(time.time() - start) / 13 * 100, 2)}% [{'=' * int((time.time() - start) / 13 * 25)}{' ' * (25 - int((time.time() - start) / 13 * 25))}] 100%"
                 embed = discord.Embed(title="Generating Image", description="Please wait while we generate your image.", color=0x2f3136)
@@ -56,8 +64,8 @@ async def generate(ctx, prompt):
     start = time.time()
     l_bar = asyncio.create_task(loading_bar(msg, start))
     async with aiohttp.ClientSession() as session:
-        auth = {"Authorization": os.getenv("AI_TOKEN")}
-        async with session.post("https://api.xeno-ai.space/images", data={"prompt": prompt}, headers=auth) as resp:
+        data = {"token": os.getenv("AI_TOKEN"), "prompt": prompt}
+        async with session.get("https://api.xeno-ai.space/images", params=data) as resp:
             if resp.status == 200:
                 l_bar.cancel()
                 data = await resp.json()
@@ -89,12 +97,18 @@ async def generate(ctx, prompt):
 @bot.command(name="stats", description="Get the vps stats")
 async def stats(ctx):
     await ctx.defer()
-    embed = discord.Embed(title="VPS Stats", description="Here are the vps stats")
-    embed.color = discord.Color.blurple()
-    embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
-    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
-    embed.add_field(name="RAM Usage", value=f"```{round(psutil.virtual_memory().used / 1024 / 1024 / 1024, 2)}GB / {round(psutil.virtual_memory().total / 1024 / 1024 / 1024, 2)}GB```", inline=True)
-    embed.add_field(name="CPU Usage", value=f"```{psutil.cpu_percent()}% / 100%```", inline=True)
-    await ctx.respond(embed=embed)
+    async with aiohttp.ClientSession() as session:
+        async with session.get("https://api.xeno-ai.space/stats") as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                embed = discord.Embed(title="Stats", description=f"Here are the stats of the vps")
+                embed.add_field(name="RAM Usage", value=f"```{round(psutil.virtual_memory().used / 1024 / 1024 / 1024, 2)}GB / {round(psutil.virtual_memory().total / 1024 / 1024 / 1024, 2)}GB```", inline=False)
+                embed.add_field(name="CPU Usage", value=f"```{psutil.cpu_percent()}% / 100%```", inline=False)
+                embed.add_field(name="Generations", value=f"```{data['total_generations']}```", inline=True)
+                embed.add_field(name="Database Size", value=f"```{round(data['database_size_mb'] / 1024, 2)}GB```", inline=True)
+                embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
+                embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
+                embed.color = discord.Color.blurple()
+                await ctx.respond(embed=embed)
 
 bot.run(TOKEN)
