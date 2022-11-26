@@ -88,7 +88,7 @@ async def generate(ctx, prompt):
                 await msg.edit_original_response(embed=embed, view=view)
             else:
                 l_bar.cancel()
-                embed = discord.Embed(title="Error", description=f"An error occurred while generating your image. Please try again later.")
+                embed = discord.Embed(title="Error", description=f"An error occurred while generating your image. Please create a ticket mentioning this.")
                 embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
                 embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
                 embed.color = discord.Color.red()
