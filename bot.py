@@ -1,4 +1,4 @@
-import discord, os, aiohttp, asyncio, time, psutil, sqlite3
+import discord, os, aiohttp, asyncio, time, psutil
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 
@@ -25,11 +25,6 @@ async def on_ready():
 
 @bot.command(name="generate", description="Generate an image from a prompt")
 async def generate(ctx, prompt):
-    log_channel = bot.get_channel(int(os.getenv("LOGS_CHANNEL_ID")))
-    embed = discord.Embed(title="Image requested", description=f"Prompt: {prompt}", color=0x00ff00)
-    embed.set_author(name=ctx.author)
-    embed.set_footer(text=f"User ID: {ctx.author.id}")
-    log_msg = await log_channel.send(embed=embed)
 
     async def loading_bar(msg, start):
         while True:
@@ -44,7 +39,7 @@ async def generate(ctx, prompt):
                 embed.color = discord.Color.blurple()
                 await msg.edit_original_response(embed=embed)
             else:
-                return True
+                start = time.time()
 
     async def upload(interaction):
         if ctx.author != interaction.user:
@@ -92,21 +87,13 @@ async def generate(ctx, prompt):
                 upload_btn.callback = upload
                 view.add_item(upload_btn)
                 await msg.edit_original_response(embed=embed, view=view)
-                embed = discord.Embed(title="Image generated", description=f"Prompt: {prompt}\nTime: {round(start - time.time(), 2)}s", color=0x00ff00)
-                embed.set_author(name=ctx.author)
-                embed.set_footer(text=f"User ID: {ctx.author.id}")
-                await log_msg.edit(embed=embed)
             else:
                 l_bar.cancel()
-                embed = discord.Embed(title="Error", description=f"An error occurred while generating your image. Please create a ticket mentioning this.")
+                embed = discord.Embed(title="Error", description=f"An error occurred while generating your image. We are expierencing a lot of traffic right now, please try again in a few seconds. This issue will be fixed soon.")
                 embed.set_footer(text="Powered by XenoAI - https://xeno-ai.space")
                 embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1042097828434034798/1044923201744023572/x_logo_21.png")
-                embed.color = discord.Color.red()
+                embed.color = discord.Color.orange()
                 await msg.edit_original_response(embed=embed)
-                embed = discord.Embed(title="Error", description=f"Prompt: {prompt}\nTime: {round(time.time() - start, 2)}s", color=0x00ff00)
-                embed.set_author(name=ctx.author)
-                embed.set_footer(text=f"User ID: {ctx.author.id}")
-                await log_msg.edit(embed=embed)
 
 @bot.command(name="stats", description="Get the vps stats")
 async def stats(ctx):
