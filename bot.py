@@ -9,6 +9,7 @@ async def on_ready():
     print(f"[-]: Logged in as {bot.user}")
     for guild in bot.guilds:
         print(f"[-]: {guild.name} ({guild.id})")
+    print(f"[-]: Loaded {len(bot.guilds)} guilds succesfully")
     while True:
         async with aiohttp.ClientSession() as session:
             async with session.get("https://api.xeno-ai.space/stats") as resp:
@@ -65,8 +66,9 @@ async def generate(ctx, prompt):
     start = time.time()
     l_bar = asyncio.create_task(loading_bar(msg, start))
     async with aiohttp.ClientSession() as session:
-        data = {"token": os.getenv("AI_TOKEN"), "prompt": prompt}
-        async with session.get("https://api.xeno-ai.space/images", params=data) as resp:
+        data = {"prompt": prompt}
+        auth = {"Authorization": os.getenv("AI_TOKEN")}
+        async with session.post("https://api.xeno-ai.space/images", json=data, headers=auth) as resp:
             if resp.status == 200:
                 l_bar.cancel()
                 data = await resp.json()
