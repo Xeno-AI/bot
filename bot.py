@@ -30,8 +30,8 @@ async def generate(ctx, prompt):
     async def loading_bar(msg, start):
         while True:
             await asyncio.sleep(2)
-            if int(time.time() - start) / 13 * 100 < 100:
-                bar = f"{round(int(time.time() - start) / 13 * 100, 2)}% [{'=' * int((time.time() - start) / 13 * 25)}{' ' * (25 - int((time.time() - start) / 13 * 25))}] 100%"
+            if int(time.time() - start) / 20 * 100 < 100:
+                bar = f"{round(int(time.time() - start) / 20 * 100, 2)}% [{'=' * int((time.time() - start) / 20 * 25)}{' ' * (25 - int((time.time() - start) / 20 * 25))}] 100%"
                 embed = discord.Embed(title="Generating Image", description="Please wait while we generate your image.", color=0x2f3136)
                 embed.add_field(name="Prompt", value=f"```{prompt}```", inline=False)
                 embed.add_field(name="Progress", value=f"```{bar}```", inline=False)
@@ -65,7 +65,7 @@ async def generate(ctx, prompt):
     msg = await ctx.respond(embed=embed)
     start = time.time()
     l_bar = asyncio.create_task(loading_bar(msg, start))
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(conn_timeout=120) as session:
         data = {"prompt": prompt}
         auth = {"Authorization": os.getenv("AI_TOKEN")}
         async with session.post("https://api.xeno-ai.space/images", json=data, headers=auth) as resp:
