@@ -9,7 +9,7 @@ async def on_ready():
     print(f"[-]: Logged in as {bot.user}")
     for guild in bot.guilds:
         print(f"[-]: {guild.name} ({guild.id})")
-    print(f"[-]: Loaded {len(bot.guilds)} guilds succesfully")
+    print(f"[-]: Loaded {len(bot.guilds)} guilds successfully")
     while True:
         async with aiohttp.ClientSession() as session:
             async with session.get("https://api.xeno-ai.space/stats") as resp:
